@@ -1,63 +1,68 @@
-// src/app/api.service.ts
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+interface LoginCredentials {
+  username: string;
+  password: string;
+}
+
+interface QuestionConfig {
+  question: string;
+}
+
+interface QuizConfig {
+  numberOfQuestions: number;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  // Change the base URL as needed (note the port and base path)
   private baseUrl = 'http://localhost:7000';
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
-
-  // User authentication
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, credentials)
+  login(credentials: LoginCredentials): Observable<{ authToken: string }> {
+    return this.http.post<{ authToken: string }>(`${this.baseUrl}/login`, credentials);
   }
 
-  logout(): Observable<any> {
+  logout(): Observable<object> {
     return this.http.post(`${this.baseUrl}/logout`, {});
   }
 
-  // File upload & preparation
-  uploadFiles(files: FileList): Observable<any> {
+  uploadFiles(files: FileList): Observable<string> {
     const formData = new FormData();
 
-    for (let i = 0; i < files.length; i++) {
-      formData.append('files', files[i]); // Append each file under the same field name
+    for (const file of Array.from(files)) {
+      formData.append('files', file);
     }
 
     return this.http.post(`${this.baseUrl}/secure/files`, formData, {
-      responseType: 'text' // or 'json', depending on your backend
+      responseType: 'text'
     });
   }
 
-  prepareFiles(): Observable<any> {
+  prepareFiles(): Observable<object> {
     return this.http.post(`${this.baseUrl}/secure/files/prepare`, {});
   }
 
-  // LLM endpoints
-  askQuestion(questionConfig: any): Observable<any> {
+  askQuestion(questionConfig: QuestionConfig): Observable<string> {
     return this.http.post(`${this.baseUrl}/secure/jarvis/ask`, questionConfig, { responseType: 'text' });
   }
 
-  createKeyPoints(): Observable<any> {
+  createKeyPoints(): Observable<string> {
     return this.http.post(`${this.baseUrl}/secure/jarvis/create-key-points`, {}, { responseType: 'text' });
   }
 
-  createNotes(): Observable<any> {
+  createNotes(): Observable<string> {
     return this.http.post(`${this.baseUrl}/secure/jarvis/create-notes`, {}, { responseType: 'text' });
   }
 
-  createQuiz(quizConfig: any): Observable<any> {
+  createQuiz(quizConfig: QuizConfig): Observable<string> {
     return this.http.post(`${this.baseUrl}/secure/jarvis/create-quiz`, quizConfig, { responseType: 'text' });
   }
 
-  createStudyGuide(): Observable<any> {
+  createStudyGuide(): Observable<string> {
     return this.http.post(`${this.baseUrl}/secure/jarvis/create-study-guide`, {}, { responseType: 'text' });
   }
-
-  // Additional admin endpoints can be added here...
 }

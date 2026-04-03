@@ -1,27 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ApiService } from '../api.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-llm',
   templateUrl: './llm.component.html',
-  styleUrls: ['./llm.component.css'], // If needed
+  styleUrls: ['./llm.component.css'],
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule]
 })
 export class LlmComponent {
   questionForm: FormGroup;
-  questionAnswer: string = "";
-  notes: string = "";
-  keyPoints: string = '';
-  quiz: string = "";
-  studyGuide: string = "";
+  questionAnswer = "";
+  notes = "";
+  keyPoints = '';
+  quiz = "";
+  studyGuide = "";
 
-  isLoading: boolean = false;
+  isLoading = false;
 
-  constructor(private apiService: ApiService, private fb: FormBuilder) {
+  private apiService = inject(ApiService);
+  private fb = inject(FormBuilder);
+
+  constructor() {
     this.questionForm = this.fb.group({
       question: ['']
     });
@@ -29,47 +33,52 @@ export class LlmComponent {
 
   askQuestion() {
     this.isLoading = true;
-    this.apiService.askQuestion(this.questionForm.value).subscribe({
-      next: (res: any) => this.questionAnswer = res,
-      error: () => this.questionAnswer = 'Failed to get answer.',
-      complete: () => this.isLoading = false
+    this.apiService.askQuestion(this.questionForm.value).pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (res: string) => this.questionAnswer = res,
+      error: () => this.questionAnswer = 'Failed to get answer.'
     });
   }
 
   createNotes() {
     this.isLoading = true;
-    this.apiService.createNotes().subscribe({
-      next: (res: any) => this.notes = res,
-      error: () => this.notes = 'Failed to create notes.',
-      complete: () => this.isLoading = false
+    this.apiService.createNotes().pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (res: string) => this.notes = res,
+      error: () => this.notes = 'Failed to create notes.'
     });
   }
 
   createKeyPoints() {
     this.isLoading = true;
-    this.apiService.createKeyPoints().subscribe({
-      next: (res: any) => this.keyPoints = res,
-      error: () => this.keyPoints = 'Failed to create key points.',
-      complete: () => this.isLoading = false
+    this.apiService.createKeyPoints().pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (res: string) => this.keyPoints = res,
+      error: () => this.keyPoints = 'Failed to create key points.'
     });
   }
 
   createQuiz() {
     this.isLoading = true;
     const quizConfig = { numberOfQuestions: 5 };
-    this.apiService.createQuiz(quizConfig).subscribe({
-      next: (res: any) => this.quiz = res,
-      error: () => this.quiz = 'Failed to create quiz.',
-      complete: () => this.isLoading = false
+    this.apiService.createQuiz(quizConfig).pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (res: string) => this.quiz = res,
+      error: () => this.quiz = 'Failed to create quiz.'
     });
   }
 
   createStudyGuide() {
     this.isLoading = true;
-    this.apiService.createStudyGuide().subscribe({
-      next: (res: any) => this.studyGuide = res,
-      error: () => this.studyGuide = 'Failed to create study guide.',
-      complete: () => this.isLoading = false
+    this.apiService.createStudyGuide().pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (res: string) => this.studyGuide = res,
+      error: () => this.studyGuide = 'Failed to create study guide.'
     });
   }
 

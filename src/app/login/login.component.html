@@ -32,5 +32,7 @@
     </button>
   </form>
 
-  <div *ngIf="errorMessage" class="message error-message">{{ errorMessage }}</div>
+  @if (errorMessage) {
+    <div class="message error-message">{{ errorMessage }}</div>
+  }
 </div>

@@ -1,7 +1,9 @@
 <div class="llm-container">
-  <div class="overlay" *ngIf="isLoading">
-    <div class="spinner">Loading...</div>
-  </div>
+  @if (isLoading) {
+    <div class="overlay">
+      <div class="spinner">Loading...</div>
+    </div>
+  }
 
   <h2>LLM Interface</h2>
 
@@ -17,30 +19,40 @@
         Ask
       </button>
     </form>
-    <p *ngIf="questionAnswer">{{ questionAnswer }}</p>
+    @if (questionAnswer) {
+      <p>{{ questionAnswer }}</p>
+    }
   </section>
 
   <section>
     <h3>Create Notes</h3>
     <button (click)="createNotes()">Create Notes</button>
-    <pre *ngIf="notes">{{ notes }}</pre>
+    @if (notes) {
+      <pre>{{ notes }}</pre>
+    }
   </section>
 
   <section>
     <h3>Create Key Points</h3>
     <button (click)="createKeyPoints()">Create Key Points</button>
-    <pre *ngIf="keyPoints">{{ keyPoints }}</pre>
+    @if (keyPoints) {
+      <pre>{{ keyPoints }}</pre>
+    }
   </section>
 
   <section>
     <h3>Create Quiz</h3>
     <button (click)="createQuiz()">Create Quiz</button>
-    <pre *ngIf="quiz">{{ quiz }}</pre>
+    @if (quiz) {
+      <pre>{{ quiz }}</pre>
+    }
   </section>
 
   <section>
     <h3>Create Study Guide</h3>
     <button (click)="createStudyGuide()">Create Study Guide</button>
-    <pre *ngIf="studyGuide">{{ studyGuide }}</pre>
+    @if (studyGuide) {
+      <pre>{{ studyGuide }}</pre>
+    }
   </section>
 </div>

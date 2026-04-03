@@ -22,14 +22,24 @@
     Prepare
   </button>
 
-  <div *ngIf="uploadMessage" class="message" [ngClass]="{'error-message': hasFailures(), 'success-message': !hasFailures() && uploadMessage.includes('Uploaded:') && !uploadMessage.includes('Failed: 0')}">{{ uploadMessage }}</div>
-  <div *ngIf="prepareMessage" class="message" [ngClass]="{'error-message': prepareMessage.includes('failed'), 'success-message': prepareMessage.includes('success')}">{{ prepareMessage }}</div>
+  @if (uploadMessage) {
+    <div class="message" [ngClass]="{'error-message': hasFailures(), 'success-message': !hasFailures() && uploadMessage.includes('Uploaded:') && !uploadMessage.includes('Failed: 0')}">{{ uploadMessage }}</div>
+  }
+  @if (prepareMessage) {
+    <div class="message" [ngClass]="{'error-message': prepareMessage.includes('failed'), 'success-message': prepareMessage.includes('success')}">{{ prepareMessage }}</div>
+  }
 
-  <ul *ngIf="uploadedFiles.length > 0" class="uploaded-files-list">
-    <li *ngFor="let file of uploadedFiles">{{ file.name }}</li>
-  </ul>
+  @if (uploadedFiles.length > 0) {
+    <ul class="uploaded-files-list">
+      @for (file of uploadedFiles; track file.name) {
+        <li>{{ file.name }}</li>
+      }
+    </ul>
+  }
 </div>
 
-<div *ngIf="loading" class="loading-overlay">
-  <span>Loading...</span>
-</div>
+@if (loading) {
+  <div class="loading-overlay">
+    <span>Loading...</span>
+  </div>
+}

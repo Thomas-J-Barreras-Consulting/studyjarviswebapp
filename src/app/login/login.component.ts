@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
@@ -14,14 +14,14 @@ import { AuthService } from '../auth.service';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  errorMessage: string = "";
+  errorMessage = "";
 
-  constructor(
-    private fb: FormBuilder,
-    private apiService: ApiService,
-    private router: Router,
-    private authService: AuthService
-  ) {
+  private fb = inject(FormBuilder);
+  private apiService = inject(ApiService);
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
+  constructor() {
     this.loginForm = this.fb.group({
       username: [''],
       password: ['']
@@ -36,7 +36,7 @@ export class LoginComponent {
 
   onSubmit() {
     if (!this.hasAnyInput()) {
-      return; // Prevent submission if no input
+      return;
     }
     console.log("Login Attempt");
     this.apiService.login(this.loginForm.value).subscribe({

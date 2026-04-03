@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../api.service';
 
@@ -12,11 +12,11 @@ import { ApiService } from '../api.service';
 export class FileManagementComponent {
   selectedFiles: FileList | null = null;
   uploadedFiles: { name: string }[] = [];
-  uploadMessage: string = "";
-  prepareMessage: string = "";
-  loading: boolean = false;
+  uploadMessage = "";
+  prepareMessage = "";
+  loading = false;
 
-  constructor(private apiService: ApiService) {}
+  private apiService = inject(ApiService);
 
   onFileChange(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -33,7 +33,7 @@ export class FileManagementComponent {
       return;
     }
 
-    this.loading = true; // Show loading overlay
+    this.loading = true;
 
     this.apiService.uploadFiles(files).subscribe({
       next: () => {
@@ -41,11 +41,11 @@ export class FileManagementComponent {
         this.uploadedFiles.push(...uploadedFiles);
 
         this.updateUploadMessage(uploadedFiles.length, 0);
-        this.loading = false; // Hide loading overlay
+        this.loading = false;
       },
       error: () => {
         this.updateUploadMessage(0, files.length);
-        this.loading = false; // Hide loading overlay
+        this.loading = false;
       }
     });
   }
@@ -55,16 +55,16 @@ export class FileManagementComponent {
   }
 
   prepareFiles() {
-    this.loading = true; // Show loading overlay
+    this.loading = true;
 
     this.apiService.prepareFiles().subscribe({
       next: () => {
         this.prepareMessage = 'Files prepared successfully!';
-        this.loading = false; // Hide loading overlay
+        this.loading = false;
       },
       error: () => {
         this.prepareMessage = 'File preparation failed.';
-        this.loading = false; // Hide loading overlay
+        this.loading = false;
       }
     });
   }
