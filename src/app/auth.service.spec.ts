@@ -5,39 +5,26 @@ describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({});
     service = TestBed.inject(AuthService);
-    localStorage.clear();
   });
 
-  afterEach(() => {
-    localStorage.clear();
+  afterEach(() => localStorage.clear());
+
+  it('returns null when no token has been set', () => {
+    expect(service.getToken()).toBeNull();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  it('setToken should store token in localStorage', () => {
-    spyOn(localStorage, 'setItem');
+  it('persists token to localStorage on setToken', () => {
     service.setToken('abc123');
-    expect(localStorage.setItem).toHaveBeenCalledWith('authToken', 'abc123');
+    expect(service.getToken()).toBe('abc123');
+    expect(localStorage.getItem('authToken')).toBe('abc123');
   });
 
-  it('getToken should return in-memory token when set', () => {
-    service.setToken('inmemory');
-    expect(service.getToken()).toBe('inmemory');
-  });
-
-  it('getToken should fall back to localStorage when in-memory token is null', () => {
-    localStorage.setItem('authToken', 'stored-token');
-    // Create a fresh service instance (no in-memory token)
-    const freshService = new AuthService();
-    expect(freshService.getToken()).toBe('stored-token');
-  });
-
-  it('getToken should return null when no token exists', () => {
-    const freshService = new AuthService();
-    expect(freshService.getToken()).toBeNull();
+  it('falls back to localStorage if instance has no in-memory token', () => {
+    localStorage.setItem('authToken', 'persisted-token');
+    const fresh = TestBed.runInInjectionContext(() => new AuthService());
+    expect(fresh.getToken()).toBe('persisted-token');
   });
 });

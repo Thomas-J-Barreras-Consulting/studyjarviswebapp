@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterModule, RouterLink } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
+import { ToastHostComponent } from './core/toast-host.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule, RouterLink],
+  imports: [RouterOutlet, ToastHostComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.sass'],
-  standalone: true
+  standalone: true,
 })
-export class AppComponent {
-  title = 'studyjarviswebapp';
-}
+export class AppComponent {}

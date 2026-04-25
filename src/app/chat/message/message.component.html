@@ -1,0 +1,79 @@
+@let isUser = message.role === 'user';
+<div
+  class="group flex gap-3"
+  [class.flex-row-reverse]="isUser"
+  style="animation: sj-fade-in 220ms ease-out both;"
+>
+  <div
+    class="flex h-8 w-8 items-center justify-center rounded-full shrink-0 mt-1"
+    [ngClass]="isUser ? 'bg-primary-600 text-white' : 'bg-bg text-primary-600 border border-border'"
+    aria-hidden="true"
+  >
+    <lucide-icon [img]="avatarIcon" [size]="15"></lucide-icon>
+  </div>
+
+  <div
+    class="flex-1 min-w-0 max-w-[min(760px,85%)]"
+    [ngClass]="isUser ? 'flex flex-col items-end' : ''"
+  >
+    @if (kindLabel) {
+      <div class="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted" [class.text-right]="isUser">
+        {{ kindLabel }}
+      </div>
+    }
+
+    @if (message.kind === 'typing') {
+      <div class="inline-flex items-center gap-1 rounded-2xl border border-border bg-surface px-4 py-3 shadow-[var(--shadow-card)]">
+        <span class="h-2 w-2 rounded-full bg-muted" style="animation: sj-pulse-dot 1.2s ease-in-out infinite;"></span>
+        <span class="h-2 w-2 rounded-full bg-muted" style="animation: sj-pulse-dot 1.2s ease-in-out 0.15s infinite;"></span>
+        <span class="h-2 w-2 rounded-full bg-muted" style="animation: sj-pulse-dot 1.2s ease-in-out 0.3s infinite;"></span>
+      </div>
+    } @else if (message.kind === 'quiz' && message.quiz) {
+      <app-quiz-card
+        [quiz]="message.quiz"
+        (quizChanged)="onQuizChanged($event)"
+        (retake)="onRetake()"
+        (harder)="onHarder()"
+      ></app-quiz-card>
+    } @else if (message.kind === 'error') {
+      <div class="rounded-2xl border border-danger-500/30 bg-danger-500/10 px-4 py-3 text-sm text-danger-600">
+        <div class="font-semibold">Something went wrong</div>
+        <div class="text-ink/80">{{ message.errorText || message.markdown }}</div>
+        <button type="button" (click)="onRegenerate()" class="mt-2 inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-medium text-ink hover:bg-bg transition-colors">
+          <lucide-icon [img]="RefreshCw" [size]="12"></lucide-icon> Retry
+        </button>
+      </div>
+    } @else {
+      <div
+        class="bubble rounded-2xl px-4 py-3 leading-relaxed"
+        [ngClass]="isUser ? 'bg-primary-600 text-white bubble-user' : 'bg-surface border border-border shadow-[var(--shadow-card)]'"
+      >
+        <markdown class="markdown-body block" [data]="message.markdown"></markdown>
+      </div>
+    }
+
+    @if (message.kind !== 'typing') {
+      <div
+        class="mt-1 flex items-center gap-2 text-[11px] text-muted opacity-0 group-hover:opacity-100 transition-opacity"
+        [class.flex-row-reverse]="isUser"
+      >
+        <span>{{ message.timestamp | date:'shortTime' }}</span>
+        @if (message.kind !== 'quiz' && message.kind !== 'error') {
+          <button type="button" (click)="copy()"
+            class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-bg text-muted hover:text-ink transition-colors"
+            [attr.aria-label]="copied() ? 'Copied' : 'Copy message'">
+            <lucide-icon [img]="copied() ? CheckCheck : Copy" [size]="12"></lucide-icon>
+            {{ copied() ? 'Copied' : 'Copy' }}
+          </button>
+          @if (!isUser) {
+            <button type="button" (click)="onRegenerate()"
+              class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-bg text-muted hover:text-ink transition-colors"
+              aria-label="Regenerate">
+              <lucide-icon [img]="RefreshCw" [size]="12"></lucide-icon> Regenerate
+            </button>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>

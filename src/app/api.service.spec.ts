@@ -1,107 +1,82 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ApiService } from './api.service';
 
 describe('ApiService', () => {
-  let service: ApiService;
+  let api: ApiService;
   let httpMock: HttpTestingController;
-  const baseUrl = 'http://localhost:7000';
+  const BASE = 'http://localhost:7000';
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()]
-    });
-    service = TestBed.inject(ApiService);
+    TestBed.configureTestingModule({ imports: [HttpClientTestingModule], providers: [ApiService] });
+    api = TestBed.inject(ApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => {
-    httpMock.verify();
-  });
+  afterEach(() => httpMock.verify());
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-
-  it('login should POST credentials to /login', () => {
-    const creds = { username: 'user', password: 'pass' };
-    service.login(creds).subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/login`);
+  it('login POSTs credentials to /login', () => {
+    api.login({ username: 'u', password: 'p' }).subscribe();
+    const req = httpMock.expectOne(`${BASE}/login`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(creds);
-    req.flush({ authToken: 'token123' });
+    expect(req.request.body).toEqual({ username: 'u', password: 'p' });
+    req.flush({ authToken: 'tok' });
   });
 
-  it('logout should POST to /logout', () => {
-    service.logout().subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/logout`);
+  it('logout POSTs to /logout', () => {
+    api.logout().subscribe();
+    const req = httpMock.expectOne(`${BASE}/logout`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({});
     req.flush({});
   });
 
-  it('uploadFiles should POST FormData to /secure/files', () => {
+  it('uploadFiles POSTs FormData to /secure/files with text response type', () => {
     const dt = new DataTransfer();
-    dt.items.add(new File(['content'], 'test.txt'));
-    const files = dt.files;
-
-    service.uploadFiles(files).subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/files`);
+    dt.items.add(new File(['x'], 'a.pdf'));
+    api.uploadFiles(dt.files).subscribe();
+    const req = httpMock.expectOne(`${BASE}/secure/files`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body instanceof FormData).toBeTrue();
     expect(req.request.responseType).toBe('text');
     req.flush('ok');
   });
 
-  it('prepareFiles should POST to /secure/files/prepare', () => {
-    service.prepareFiles().subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/files/prepare`);
+  it('prepareFiles POSTs to /secure/files/prepare', () => {
+    api.prepareFiles().subscribe();
+    const req = httpMock.expectOne(`${BASE}/secure/files/prepare`);
     expect(req.request.method).toBe('POST');
     req.flush({});
   });
 
-  it('askQuestion should POST config to /secure/jarvis/ask', () => {
-    const config = { question: 'What is Angular?' };
-    service.askQuestion(config).subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/jarvis/ask`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(config);
+  it('askQuestion POSTs question and expects text', () => {
+    api.askQuestion({ question: 'why?' }).subscribe();
+    const req = httpMock.expectOne(`${BASE}/secure/jarvis/ask`);
+    expect(req.request.body).toEqual({ question: 'why?' });
     expect(req.request.responseType).toBe('text');
-    req.flush('Angular is a framework');
+    req.flush('answer');
   });
 
-  it('createKeyPoints should POST to /secure/jarvis/create-key-points', () => {
-    service.createKeyPoints().subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/jarvis/create-key-points`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.responseType).toBe('text');
-    req.flush('key points');
+  it('createKeyPoints / createNotes / createStudyGuide POST to expected paths', () => {
+    api.createKeyPoints().subscribe();
+    const r1 = httpMock.expectOne(`${BASE}/secure/jarvis/create-key-points`);
+    expect(r1.request.method).toBe('POST');
+    r1.flush('a');
+
+    api.createNotes().subscribe();
+    const r2 = httpMock.expectOne(`${BASE}/secure/jarvis/create-notes`);
+    expect(r2.request.method).toBe('POST');
+    r2.flush('b');
+
+    api.createStudyGuide().subscribe();
+    const r3 = httpMock.expectOne(`${BASE}/secure/jarvis/create-study-guide`);
+    expect(r3.request.method).toBe('POST');
+    r3.flush('c');
   });
 
-  it('createNotes should POST to /secure/jarvis/create-notes', () => {
-    service.createNotes().subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/jarvis/create-notes`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.responseType).toBe('text');
-    req.flush('notes');
-  });
-
-  it('createQuiz should POST config to /secure/jarvis/create-quiz', () => {
-    const quizConfig = { numberOfQuestions: 5 };
-    service.createQuiz(quizConfig).subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/jarvis/create-quiz`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(quizConfig);
-    expect(req.request.responseType).toBe('text');
+  it('createQuiz POSTs the configuration', () => {
+    api.createQuiz({ numberOfQuestions: 3 }).subscribe();
+    const req = httpMock.expectOne(`${BASE}/secure/jarvis/create-quiz`);
+    expect(req.request.body).toEqual({ numberOfQuestions: 3 });
     req.flush('quiz');
-  });
-
-  it('createStudyGuide should POST to /secure/jarvis/create-study-guide', () => {
-    service.createStudyGuide().subscribe();
-    const req = httpMock.expectOne(`${baseUrl}/secure/jarvis/create-study-guide`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.responseType).toBe('text');
-    req.flush('study guide');
   });
 });

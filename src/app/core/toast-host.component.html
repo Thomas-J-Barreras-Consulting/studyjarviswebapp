@@ -1,0 +1,24 @@
+<div class="pointer-events-none fixed bottom-4 right-4 z-[9999] flex flex-col gap-2" aria-live="polite">
+  @for (t of toasts(); track t.id) {
+    <div
+      class="pointer-events-auto flex items-start gap-2 rounded-md border bg-surface px-3 py-2.5 text-sm shadow-[var(--shadow-pop)] min-w-[260px] max-w-[380px]"
+      [ngClass]="borderClass(t.kind)"
+      style="animation: sj-fade-in 180ms ease-out;"
+      role="status"
+    >
+      <span class="mt-0.5 shrink-0" [ngClass]="iconColor(t.kind)">
+        @switch (t.kind) {
+          @case ('success') { <lucide-icon [img]="CheckCircle2" [size]="16"></lucide-icon> }
+          @case ('error')   { <lucide-icon [img]="XCircle"      [size]="16"></lucide-icon> }
+          @default          { <lucide-icon [img]="Info"         [size]="16"></lucide-icon> }
+        }
+      </span>
+      <div class="flex-1 text-ink">{{ t.message }}</div>
+      <button type="button" (click)="svc.dismiss(t.id)"
+        class="shrink-0 text-muted hover:text-ink transition-colors"
+        aria-label="Dismiss">
+        <lucide-icon [img]="X" [size]="14"></lucide-icon>
+      </button>
+    </div>
+  }
+</div>

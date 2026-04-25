@@ -1,0 +1,93 @@
+<div class="flex h-dvh w-full overflow-hidden bg-bg">
+  <app-sidebar class="hidden md:flex h-full shrink-0"></app-sidebar>
+
+  <main class="flex min-w-0 flex-1 flex-col">
+    <header class="flex items-center gap-3 border-b border-border bg-surface px-4 py-3">
+      <div class="flex-1 min-w-0">
+        <h1 class="truncate text-sm font-semibold text-ink">
+          {{ active()?.title || 'New conversation' }}
+        </h1>
+        <div class="text-[11px] text-muted">
+          {{ readyFileCount() }} file{{ readyFileCount() === 1 ? '' : 's' }} ready
+          @if (messages().length) { · {{ messages().length }} message{{ messages().length === 1 ? '' : 's' }} }
+        </div>
+      </div>
+      <button
+        type="button"
+        (click)="openDrawer()"
+        class="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:border-primary-300 hover:bg-primary-50 transition-colors"
+      >
+        <lucide-icon [img]="FolderOpen" [size]="14"></lucide-icon>
+        Files
+        @if (store.files().length) {
+          <span class="ml-1 rounded-full bg-primary-600 px-1.5 py-px text-[10px] font-semibold text-white">
+            {{ store.files().length }}
+          </span>
+        }
+      </button>
+    </header>
+
+    <div #scrollBody class="flex-1 overflow-y-auto">
+      <div class="mx-auto max-w-[820px] px-4 py-6">
+        @if (showEmptyState()) {
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+              <lucide-icon [img]="Sparkles" [size]="26"></lucide-icon>
+            </div>
+            <h2 class="mt-4 text-xl font-semibold text-ink">Ready to study</h2>
+            <p class="mt-1 max-w-md text-sm text-muted">
+              Ask anything about your materials, or pick a quick action below to generate notes, key points, a quiz, or a study guide.
+            </p>
+            <div class="mt-6 grid w-full max-w-lg grid-cols-2 gap-2 sm:grid-cols-4">
+              <button type="button" (click)="quickAction('notes')"
+                class="flex flex-col items-center gap-1.5 rounded-md border border-border bg-surface p-3 text-xs font-medium text-ink hover:border-primary-300 hover:bg-primary-50 transition-colors">
+                <lucide-icon [img]="FileText" [size]="18"></lucide-icon> Notes
+              </button>
+              <button type="button" (click)="quickAction('keypoints')"
+                class="flex flex-col items-center gap-1.5 rounded-md border border-border bg-surface p-3 text-xs font-medium text-ink hover:border-primary-300 hover:bg-primary-50 transition-colors">
+                <lucide-icon [img]="Key" [size]="18"></lucide-icon> Key Points
+              </button>
+              <button type="button" (click)="quickAction('quiz')"
+                class="flex flex-col items-center gap-1.5 rounded-md border border-border bg-surface p-3 text-xs font-medium text-ink hover:border-primary-300 hover:bg-primary-50 transition-colors">
+                <lucide-icon [img]="HelpCircle" [size]="18"></lucide-icon> Quiz
+              </button>
+              <button type="button" (click)="quickAction('studyguide')"
+                class="flex flex-col items-center gap-1.5 rounded-md border border-border bg-surface p-3 text-xs font-medium text-ink hover:border-primary-300 hover:bg-primary-50 transition-colors">
+                <lucide-icon [img]="BookOpen" [size]="18"></lucide-icon> Study Guide
+              </button>
+            </div>
+            @if (readyFileCount() === 0) {
+              <button type="button" (click)="openDrawer()"
+                class="mt-6 inline-flex items-center gap-1.5 rounded-full bg-accent-500/10 px-3 py-1.5 text-xs font-medium text-accent-700 hover:bg-accent-500/20 transition-colors">
+                <lucide-icon [img]="FolderOpen" [size]="13"></lucide-icon>
+                Attach files to get started
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col gap-6" role="log" aria-live="polite">
+            @for (msg of messages(); track msg.id) {
+              <app-message
+                [message]="msg"
+                (quizChanged)="onQuizChanged(msg.id, $event)"
+                (retakeQuiz)="onRetakeQuiz(msg)"
+                (harderQuiz)="onHarderQuiz(msg)"
+                (regenerate)="onRegenerate(msg)"
+              ></app-message>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <app-composer
+      [busy]="busy()"
+      [attachedCount]="readyFileCount()"
+      (submitted)="onComposerSubmit($event)"
+      (stopRequested)="onStop()"
+      (attachClicked)="openDrawer()"
+    ></app-composer>
+  </main>
+
+  <app-file-drawer [open]="drawerOpen()" (closed)="closeDrawer()"></app-file-drawer>
+</div>

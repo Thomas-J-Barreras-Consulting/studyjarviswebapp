@@ -1,0 +1,115 @@
+@if (open) {
+  <div
+    class="fixed inset-0 z-40 bg-ink/30 backdrop-blur-[2px]"
+    (click)="close()"
+    aria-hidden="true"
+    style="animation: sj-fade-in 150ms ease-out;"
+  ></div>
+
+  <aside
+    class="fixed right-0 top-0 z-50 flex h-full w-full sm:w-[400px] flex-col bg-surface shadow-[var(--shadow-pop)]"
+    role="dialog"
+    aria-label="Attached files"
+    style="animation: sj-fade-in 180ms ease-out;"
+  >
+    <header class="flex items-center gap-2 border-b border-border px-4 py-3">
+      <h2 class="flex-1 text-sm font-semibold text-ink">Files</h2>
+      <button
+        type="button"
+        (click)="close()"
+        class="flex h-8 w-8 items-center justify-center rounded-md text-muted hover:bg-bg hover:text-ink transition-colors"
+        aria-label="Close drawer"
+      >
+        <lucide-icon [img]="X" [size]="16"></lucide-icon>
+      </button>
+    </header>
+
+    <input
+      #fileInput
+      type="file"
+      multiple
+      class="sr-only"
+      (change)="onFileChange($event)"
+      aria-hidden="true"
+    />
+
+    <div class="p-4">
+      <button
+        type="button"
+        (click)="openPicker()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)"
+        class="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-4 py-8 text-center transition-colors"
+        [ngClass]="dragActive() ? 'border-primary-500 bg-primary-50' : 'border-border hover:border-primary-300 hover:bg-bg'"
+      >
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
+          <lucide-icon [img]="Upload" [size]="18"></lucide-icon>
+        </div>
+        <div class="text-sm font-medium text-ink">Drop files here or click to browse</div>
+        <div class="text-[11px] text-muted">PDF, PPT, DOC — up to 10 MB each</div>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-4 pb-4">
+      @if (files().length === 0) {
+        <div class="rounded-md border border-dashed border-border p-6 text-center text-sm text-muted">
+          No files attached yet.<br>
+          Upload your lecture slides, PDFs or notes to start.
+        </div>
+      } @else {
+        <div class="mb-2 flex items-center justify-between">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-muted">
+            {{ files().length }} file{{ files().length === 1 ? '' : 's' }}
+          </div>
+          <button
+            type="button"
+            (click)="clearAll()"
+            class="text-[11px] font-medium text-muted hover:text-danger-500 transition-colors"
+          >
+            Clear all
+          </button>
+        </div>
+
+        <ul class="space-y-1.5">
+          @for (f of files(); track f.id) {
+            <li class="flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2.5">
+              <div
+                class="flex h-9 w-9 items-center justify-center rounded-md shrink-0"
+                [ngClass]="f.status === 'failed' ? 'bg-danger-500/10 text-danger-500' : 'bg-primary-100 text-primary-700'"
+              >
+                <lucide-icon [img]="iconFor(f)" [size]="16"></lucide-icon>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="truncate text-sm font-medium text-ink" [title]="f.name">{{ f.name }}</div>
+                <div class="flex items-center gap-1.5 text-[11px] text-muted">
+                  <span>{{ f.size | formatBytes }}</span>
+                  <span aria-hidden="true">·</span>
+                  <span class="inline-flex items-center gap-1" [ngClass]="statusColor(f)">
+                    @if (f.status === 'uploading' || f.status === 'preparing' || f.status === 'uploaded') {
+                      <span class="inline-block h-3 w-3 rounded-full border-2 border-primary-500/30 border-t-primary-500"
+                        style="animation: sj-spin 0.8s linear infinite;"></span>
+                    } @else if (f.status === 'ready') {
+                      <lucide-icon [img]="CheckCircle2" [size]="11"></lucide-icon>
+                    } @else if (f.status === 'failed') {
+                      <lucide-icon [img]="AlertCircle" [size]="11"></lucide-icon>
+                    }
+                    {{ statusLabel(f) }}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="remove(f.id)"
+                class="flex h-7 w-7 items-center justify-center rounded-md text-muted hover:bg-danger-500/10 hover:text-danger-500 transition-colors"
+                [attr.aria-label]="'Remove ' + f.name"
+              >
+                <lucide-icon [img]="Trash2" [size]="13"></lucide-icon>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </aside>
+}

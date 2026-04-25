@@ -1,55 +1,58 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../api.service';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../auth.service';
+import { LucideAngularModule, BookOpenText, ArrowRight } from 'lucide-angular';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  imports: [CommonModule, ReactiveFormsModule],
-  standalone: true
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+  standalone: true,
 })
 export class LoginComponent {
-  loginForm: FormGroup;
-  errorMessage = "";
+  readonly loginForm: FormGroup;
+  readonly errorMessage = signal<string>('');
+  readonly loading = signal<boolean>(false);
 
-  private fb = inject(FormBuilder);
-  private apiService = inject(ApiService);
-  private router = inject(Router);
-  private authService = inject(AuthService);
+  readonly BookOpenText = BookOpenText;
+  readonly ArrowRight = ArrowRight;
+
+  private readonly fb = inject(FormBuilder);
+  private readonly apiService = inject(ApiService);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   constructor() {
     this.loginForm = this.fb.group({
-      username: [''],
-      password: ['']
+      username: ['', Validators.required],
+      password: ['', Validators.required],
     });
   }
 
-  hasAnyInput(): boolean {
-    const username = this.loginForm.get('username')?.value;
+  get canSubmit(): boolean {
+    const username = this.loginForm.get('username')?.value?.trim();
     const password = this.loginForm.get('password')?.value;
-    return !!(username && username.trim() !== '' || password && password.trim() !== '');
+    return !!username && !!password && !this.loading();
   }
 
-  onSubmit() {
-    if (!this.hasAnyInput()) {
-      return;
-    }
-    console.log("Login Attempt");
+  onSubmit(): void {
+    if (!this.canSubmit) return;
+    this.loading.set(true);
+    this.errorMessage.set('');
     this.apiService.login(this.loginForm.value).subscribe({
       next: (response) => {
-        console.log('Login successful', response);
-        const authToken = response.authToken + "";
+        const authToken = String(response.authToken);
         this.authService.setToken(authToken);
-        this.router.navigate(['/manage']);
+        this.loading.set(false);
+        this.router.navigate(['/app']);
       },
-      error: (error) => {
-        console.error('Login error', error);
-        this.errorMessage = 'Invalid credentials';
-      }
+      error: () => {
+        this.loading.set(false);
+        this.errorMessage.set('Invalid credentials');
+      },
     });
   }
 }
