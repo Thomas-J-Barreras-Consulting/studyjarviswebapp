@@ -10,7 +10,7 @@
 
 ## Overview
 
-This is the user-facing companion to the [StudyJarvis backend](https://github.com/Thomas-J-Barreras-Consulting/studyjarvis). It's a fully-signal-based, OnPush, standalone-component Angular 19 SPA that consumes the backend's JWT-authenticated REST API and renders Gemini-generated markdown into interactive UI — including an in-place quiz parser with auto-grading for multiple-choice and LLM-graded short-answer.
+This is the user-facing companion to the [StudyJarvis backend](https://github.com/Thomas-J-Barreras-Consulting/studyjarvis). It's a signal-based, OnPush, standalone-component Angular 19 SPA that consumes the backend's JWT-authenticated REST API and renders Gemini-generated markdown into interactive UI — including an in-place quiz parser with auto-grading for multiple-choice and LLM-graded short-answer.
 
 ## Screenshots
 
@@ -92,7 +92,7 @@ The webapp expects the [StudyJarvis backend](https://github.com/Thomas-J-Barrera
 
 For one-command full-stack local dev (backend + webapp in two pwsh windows), see [`dev.ps1`](https://github.com/Thomas-J-Barreras-Consulting/studyjarvis#quick-start) in the backend repo.
 
-## Engineering & quality
+## CI Pipeline
 
 ```mermaid
 flowchart LR
