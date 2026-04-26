@@ -16,9 +16,9 @@ This is the user-facing companion to the [StudyJarvis backend](https://github.co
 
 <div align="center">
 
-| Chat home | Ask | Comprehensive notes | Interactive quiz |
-| :---: | :---: | :---: | :---: |
-| <img src="docs/images/study-jarvis-home.png" alt="Chat home" width="220" /> | <img src="docs/images/study-jarvis-ask.png" alt="Ask the AI" width="220" /> | <img src="docs/images/study-jarvis-notes.png" alt="Generated notes" width="220" /> | <img src="docs/images/study-jarvis-interactive-quiz.png" alt="Interactive quiz" width="220" /> |
+| Ask | Comprehensive notes | Interactive quiz |
+| :---: | :---: | :---: |
+| <img src="docs/images/study-jarvis-ask.png" alt="Ask the AI" width="220" /> | <img src="docs/images/study-jarvis-notes.png" alt="Generated notes" width="220" /> | <img src="docs/images/study-jarvis-interactive-quiz.png" alt="Interactive quiz" width="220" /> |
 
 </div>
 
